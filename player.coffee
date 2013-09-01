@@ -106,7 +106,7 @@ class CharacterPlayer
 
     open: (file) ->
         try
-            @np.src = URL.createObjectURL(file)
+            @np.src = file
         catch error
             alert error
             return false

@@ -36,7 +36,7 @@ loadPlayer = () ->
             use_character: input_use_character.checked
 
     onFileOpen = () ->
-        player.open @files[0]
+        player.open URL.createObjectURL @files[0]
 
     onForceBlackSet = () ->
         player.setOption
@@ -73,7 +73,7 @@ loadPlayer = () ->
     document.body.addEventListener("drop", (event) ->
         event.preventDefault()
         file = event.dataTransfer.files[0]
-        player.open(file)
+        player.open URL.createObjectURL file
     )
 
 window.addEventListener("load", loadPlayer)
