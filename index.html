@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>HTML5 Character Player</title>
+    <script src="player.js"></script>
+    <script src="index.js"></script>
+    <meta name="description" content="A player that plays video as ASCII-art.">
+    <meta name="keywords" content="HTML5,Canvas,JavaScript,Video,Video Tag,ASCII Art,Character Player">
+    <meta name="author" content="Xinkai Chen">
+    <style>
+        .clearfix:after {
+             visibility: hidden;
+             display: block;
+             font-size: 0;
+             content: " ";
+             clear: both;
+             height: 0;
+        }
+        .clearfix { display: inline-block; }
+        html[xmlns] .clearfix { display: block; }
+        * html .clearfix { height: 1%; }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+        body {
+            width: 1280px;
+            margin: 0 auto;
+        }
+        #native_player, #ascii_player {
+            background: green;
+            display: inline-block;
+        }
+
+        fieldset {
+            float: left;
+            width: 380px;
+            margin-right: 25px;
+            height: 170px;
+        }
+
+        p.question {
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #browser_video_format {
+            width: 500px;
+        }
+
+        #browser_video_format > thead > tr > th {
+            background: #352642;
+            color: whitesmoke;
+        }
+    </style>
+</head>
+<body>
+<h2>HTML5 Character Player</h2>
+<video id="native_player" autoplay="false" controls loop></video>
+<canvas id="ascii_player"></canvas>
+
+<section class="clearfix">
+    <fieldset>
+        <legend>Open File</legend>
+        <input type="file" id="input_file_open" accept="video/*" /><br />
+        You can also drag a video file from your computer and drop <span style="background: lightskyblue">HERE</span>.
+        <hr />
+        Video Height: <span id="video_height"></span><br />
+        Video Width: <span id="video_width"></span><br />
+        <button type="button" id="btn_snapshot" disabled>Snapshot</button>
+        <button type="button" id="btn_fullscreen">Fullscreen</button>
+    </fieldset>
+    <fieldset>
+        <legend>Setting</legend>
+        <strong>Pixelate</strong>
+        width: <input type="number" id="input_pixelate_width" value="10" min="2" max="50" />px
+        height: <input type="number" id="input_pixelate_height" value="10" min="2" max="50" />px<br />
+        <label><input type="checkbox" id="input_use_character" />Use characters:</label>
+        <input type="text" id="input_character_set" value="&#9608; &#9619; &#9618; &#9617; &nbsp;" disabled /><br />
+        <p style="margin: 3px 0">
+            Characters set examples: <span style="background:lightgrey">@ A k o 一 . &amp;nbsp;</span><br />
+            Order matters: "intense" characters should come first. Use space as a delimiter.
+        </p>
+        <label><input type="checkbox" id="input_force_black" />Force black characters</label>
+    </fieldset>
+</section>
+<article id="AnQ">
+    <h4>A &amp; Q</h4>
+    <p class="question">Which kind of file can be played?</p>
+    <p>
+        The video files on your hard drive with the right format. The format depends on which browser you're using.
+        <table id="browser_video_format">
+            <thead>
+                <tr>
+                    <th>Browser</th>
+                    <th>Mp4</th>
+                    <th>WebM</th>
+                    <th>Ogg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Internet Explorer</td>
+                    <td>yes</td>
+                    <td>no</td>
+                    <td>no</td>
+                </tr>
+                <tr>
+                    <td>Chrome</td>
+                    <td>yes</td>
+                    <td>yes</td>
+                    <td>yes</td>
+                </tr>
+                <tr>
+                    <td>Firefox</td>
+                    <td>no</td>
+                    <td>yes</td>
+                    <td>yes</td>
+                </tr>
+                <tr>
+                    <td>Safari</td>
+                    <td>yes</td>
+                    <td>no</td>
+                    <td>no</td>
+                </tr>
+                <tr>
+                    <td>Opera</td>
+                    <td>no</td>
+                    <td>yes</td>
+                    <td>yes</td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <strong>Note:</strong>It is possible that you have a file that ends with ".mp4" but cannot be played with Chrome. Extension names doesn't tell everything about a file.
+        <br />
+        <i>Bad Apple</i> has been tested again on Google Chrome. You can <a href="http://www.rayfile.com/zh-cn/files/9af33f66-c83c-11de-89d4-0014221b798a/" rel="nofollow">download <i>Bad Apple</i></a>.
+    </p>
+
+    <p class="question">File not opening / No sound</p>
+    <p>
+        It might be a compatibility issue.<br />
+        Using the latest <a href="http://www.google.com/chrome" rel="nofollow">Google Chrome</a> on a not-too-old computer is recommended.
+    </p>
+
+    <p class="question">Extremely slow / laggy</p>
+    <p>
+        Due to the technical reasons, this software can be resource hogging. <br />
+        Do not even try running this on a mobile device or an old computer. <br />
+        You can try increasing pixelate size, by which the CPU workload decreases.
+    </p>
+
+    <p class="question">Source code / License</p>
+    <p>
+        This is a free software. Visit github:
+    </p>
+</article>
+
+<hr style="margin-top: 20px;" />
+<footer>
+    <a href="http://www.cuoan.net/">Visit my blog</a>
+</footer>
+<script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9522990-6']);
+  _gaq.push(['_setDomainName', 'cuoan.net']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</body>
+</html>
