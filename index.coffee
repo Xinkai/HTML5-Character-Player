@@ -14,8 +14,8 @@ loadPlayer = () ->
     btn_snapshot = document.getElementById("btn_snapshot")
 
     player = new CharacterPlayer(np, ap, {
-        pixelate_width: input_pixelate_width.value
-        pixelate_height: input_pixelate_height.value
+        horizontal_sample_rate: input_pixelate_width.value
+        vertical_sample_rate: input_pixelate_height.value
         use_character: input_use_character.checked
         character_set: input_character_set.value.split(" ")
         force_black: input_force_black.checked
