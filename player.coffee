@@ -39,11 +39,24 @@ if "isFullscreen" not of document
                 return false
     })
 
+# Utilities
+addPixelate = (obj, fillStyle, text, h, v) ->
+    # Add everything needed for painting a frame to an object.
+    # This object is later handed to paintFrame.
+    value = obj[fillStyle]
+    if value
+        value.push(text, h, v)
+        obj[fillStyle] = value
+    else
+        obj[fillStyle] = new Array(text, h, v)
+
 class CharacterPlayer
-    constructor: (@np, @ap, options) ->
+    constructor: (@np, @ap, options, onFpsUpdate) ->
         # for RequestAnimationFrame
         @requestId = null
-
+        @framePainted = null
+        @fpsIntervalId = null
+        @fpsUpdateRate = 250
         # options
         @option = options
 
@@ -55,10 +68,14 @@ class CharacterPlayer
         @apContext.font = "5px"
 
         @np.addEventListener "playing", () =>
-            @requestId = requestAnimationFrame(@drawFrame)
+            @onPause()
+            @fpsIntervalId = setInterval( () =>
+                onFpsUpdate @framePainted / (@fpsUpdateRate / 1000)
+                @framePainted = 0
+            , @fpsUpdateRate)
+            @requestId = requestAnimationFrame(@nextFrame)
 
-        @np.addEventListener "pause", () =>
-            cancelAnimationFrame(@requestId)
+        @np.addEventListener "pause", @onPause
 
         @np.addEventListener("canplay", () =>
             @sn.width = @np.videoWidth
@@ -71,7 +88,14 @@ class CharacterPlayer
         document.addEventListener("msfullscreenchange", @onFullscreenChange)
         document.addEventListener("ofullscreenchange", @onFullscreenChange)
 
-    drawFrame: () =>
+    onPause: () =>
+        if @requestId
+            cancelAnimationFrame(@requestId)
+        if @fpsIntervalId
+            clearInterval(@fpsIntervalId)
+        @framePainted = 0
+
+    nextFrame: () =>
         # snapshot
         @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
 
@@ -79,26 +103,50 @@ class CharacterPlayer
         @apContext.fillStyle = "white"
         @apContext.fillRect(0, 0, @ap.width, @ap.height)
 
-        for h in [0...Math.round(@np.videoWidth / @option.horizontal_sample_rate)]
-            for v in [0...Math.round(@np.videoHeight / @option.vertical_sample_rate)]
-                pixelArray = @snContext.getImageData(
+        numHorizontalSamples = Math.round(@np.videoWidth / @option.horizontal_sample_rate)
+        numVerticalSamples = Math.round(@np.videoHeight / @option.vertical_sample_rate)
+
+        pixelates = new Object(null)
+        # pixelates = {
+        #    [fillStyle]: [h1, v1, text], [h2, v2]
+        # }
+
+        for h in [0...numHorizontalSamples] by 1
+            for v in [0...numVerticalSamples] by 1
+                areaPixelArray = @snContext.getImageData(
                     h * @option.horizontal_sample_rate, v * @option.vertical_sample_rate,
                     @option.horizontal_sample_rate, @option.vertical_sample_rate
                 )
-                pixelate = @pixelateArea(pixelArray.data)
+                pixelate = @pixelateArea(areaPixelArray.data)
 
-                @apContext.fillStyle = pixelate[0]
-
+                fillStyle = pixelate[0]
                 if @option.use_character
                     if @option.force_black
-                        @apContext.fillStyle = "black"
+                        fillStyle = "black"
                     text = @option.character_set[Math.floor(pixelate[1] / (256 / @option.character_set.length))]
-                    @apContext.fillText(text, h * @option.horizontal_sample_rate, v * @option.vertical_sample_rate)
+                    addPixelate(pixelates, fillStyle, text, h, v)
                 else
-                    @apContext.fillRect(h * @option.horizontal_sample_rate, v * @option.vertical_sample_rate,
-                                        @option.horizontal_sample_rate, @option.vertical_sample_rate)
+                    addPixelate(pixelates, fillStyle, null, h, v)
 
-        @requestId = requestAnimationFrame(@drawFrame)
+        @paintFrame(pixelates)
+        @framePainted++
+        @requestId = requestAnimationFrame(@nextFrame)
+        null
+
+    paintFrame: (pixelates) ->
+        for fillStyle, details of pixelates
+            @apContext.fillStyle = fillStyle
+            for i in [0...details.length] by 3
+                if @option.use_character
+                    @apContext.fillText(details[i],
+                                        details[i+1] * @option.horizontal_sample_rate,
+                                        details[i+2] * @option.vertical_sample_rate)
+                else
+                    @apContext.fillRect(details[i+1] * @option.horizontal_sample_rate,
+                                        details[i+2] * @option.vertical_sample_rate,
+                                        @option.horizontal_sample_rate,
+                                        @option.vertical_sample_rate)
+        null
 
     setOption: (options) ->
         for key, value of options
@@ -143,19 +191,25 @@ class CharacterPlayer
             console.log "exit fullscreen"
 
     pixelateArea: (pixelArrayData) ->
-        # return [(red, green, black), grayscale]
+        # return [rgb_css_str, greyscale]
         numPixels = pixelArrayData.length / 4
-        rgb = [0, 0, 0]
-        for item, i in pixelArrayData
-            m = i % 4
-            if m isnt 3
-                rgb[m] += item
 
-        for color, i in rgb
-            rgb[i] = Math.round(color / numPixels)
+        r = 0
+        g = 0
+        b = 0
+
+        for i in [0...pixelArrayData.length] by 4
+            r += pixelArrayData[i]
+            g += pixelArrayData[i + 1]
+            b += pixelArrayData[i + 2]
+
+        r = Math.round(r / numPixels)
+        g = Math.round(g / numPixels)
+        b = Math.round(b / numPixels)
 
         return [
-            "rgb(#{rgb.join(', ')})"
-            (rgb[0] + rgb[1] + rgb[2]) / 3
+            "rgb(#{r}, #{g}, #{b})"
+            (r + g + b) / 3
         ]
+
 window.CharacterPlayer = CharacterPlayer

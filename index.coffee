@@ -19,7 +19,9 @@ loadPlayer = () ->
         use_character: input_use_character.checked
         character_set: input_character_set.value.split(" ")
         force_black: input_force_black.checked
-    })
+    }, (fps) ->
+        document.getElementById("fps").innerHTML = fps
+    )
 
     onPixelateSizeChange = () ->
         player.setOption
