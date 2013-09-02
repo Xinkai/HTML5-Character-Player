@@ -45,7 +45,8 @@ loadPlayer = () ->
             force_black: input_force_black.checked
 
     onFullscreenClick = () ->
-        player.requestFullScreen()
+        if not player.requestFullScreen()
+            alert "Your browser doesn't support full screen."
 
     onSnapshotClick = () ->
         window.open(ap.toDataURL(), "Snapshot")

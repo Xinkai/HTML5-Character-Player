@@ -27,15 +27,10 @@ if "isFullscreen" not of document
                 return document.webkitIsFullScreen
             else if "mozFullScreen" of document
                 return document.mozFullScreen
-
-             # Cannot find the implementation about IE and opera
-#            else if "msFullscreenEnabled" of document
-#                return document.msFullscreenEnabled
-#
-#            else if "oFullscreenEnabled" of document
-#                return document.oFullscreenEnabled
+            else if "msFullscreenElement" of document
+                return document.msFullscreenElement isnt null
             else
-                console.log "no support for fullscreenEnabled"
+                console.log "no support for isFullscreen"
                 return false
     })
 
@@ -82,11 +77,10 @@ class CharacterPlayer
             @sn.height = @np.videoHeight
         )
 
+        document.addEventListener("fullscreenchange", @onFullscreenChange)
         document.addEventListener("webkitfullscreenchange", @onFullscreenChange)
         document.addEventListener("mozfullscreenchange", @onFullscreenChange)
-        document.addEventListener("fullscreenchange", @onFullscreenChange)
-        document.addEventListener("msfullscreenchange", @onFullscreenChange)
-        document.addEventListener("ofullscreenchange", @onFullscreenChange)
+        document.addEventListener("MSFullscreenChange", @onFullscreenChange)
 
     onPause: () =>
         if @requestId
@@ -160,20 +154,19 @@ class CharacterPlayer
             return false
 
     requestFullScreen: () =>
-        if "requestFullScreen" of @ap
-            @ap.requestFullScreen()
-        else if "webkitRequestFullScreen" of @ap
+        if "requestFullscreen" of @ap # standard treats fullscreen as one word.
+            @ap.requestFullscreen()
+        else if "webkitRequestFullScreen" of @ap # Chrome support both!!
             @ap.webkitRequestFullScreen()
-        else if "mozRequestFullScreen" of @ap
+        else if "webkitRequestFullscreen" of @ap
+            @ap.webbkitRequestscreen()
+        else if "mozRequestFullScreen" of @ap # Firefox
             @ap.mozRequestFullScreen()
-        # future proof
-        else if "msRequestFullScreen" of @ap
-            @ap.msRequestFullScreen()
-        else if "oRequestFullScreen" of @ap
-            @ap.oRequestFullScreen()
+        else if "msRequestFullscreen" of @ap # IE treats fullscreen as one word. ^_^
+            @ap.msRequestFullscreen()
         else
-            alert "Your browser doesn't support full screen."
             return false
+        return true
 
     onFullscreenChange: (event) =>
         if document.isFullscreen
