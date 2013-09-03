@@ -115,11 +115,22 @@ class CharacterPlayer
         # }
 
         for h in [0...numHorizontalSamples] by 1
+            areaLeft = h * @option.horizontal_sample_rate
+
+            if h is numHorizontalSamples - 1 # last column
+                areaWidth = @sn.width - areaLeft
+            else
+                areaWidth = @option.horizontal_sample_rate
+
             for v in [0...numVerticalSamples] by 1
-                areaPixelArray = @snContext.getImageData(
-                    h * @option.horizontal_sample_rate, v * @option.vertical_sample_rate,
-                    @option.horizontal_sample_rate, @option.vertical_sample_rate
-                )
+                areaTop = v * @option.vertical_sample_rate
+
+                if v is numVerticalSamples - 1 # last row
+                    areaHeight = @sn.height - areaTop
+                else
+                    areaHeight = @option.vertical_sample_rate
+
+                areaPixelArray = @snContext.getImageData(areaLeft, areaTop, areaWidth, areaHeight)
                 pixelate = @pixelateArea(areaPixelArray.data)
 
                 fillStyle = pixelate[0]
