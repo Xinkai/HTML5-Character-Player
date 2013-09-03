@@ -46,7 +46,7 @@ addPixelate = (obj, fillStyle, text, h, v) ->
         obj[fillStyle] = new Array(text, h, v)
 
 class CharacterPlayer
-    constructor: (@np, @ap, options, onFpsUpdate) ->
+    constructor: (@np, @cp, options, onFpsUpdate) ->
         # for RequestAnimationFrame
         @requestId = null
         @framePainted = null
@@ -59,8 +59,8 @@ class CharacterPlayer
         @sn = document.createElement("canvas")
         @snContext = @sn.getContext("2d")
 
-        @apContext = @ap.getContext("2d")
-        @apContext.font = "5px"
+        @cpContext = @cp.getContext("2d")
+        @cpContext.font = "5px"
 
         @np.addEventListener "playing", () =>
             @onPause()
@@ -94,8 +94,8 @@ class CharacterPlayer
         @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
 
         # clean canvas
-        @apContext.fillStyle = "white"
-        @apContext.fillRect(0, 0, @ap.width, @ap.height)
+        @cpContext.fillStyle = "white"
+        @cpContext.fillRect(0, 0, @cp.width, @cp.height)
 
         numHorizontalSamples = Math.round(@np.videoWidth / @option.horizontal_sample_rate)
         numVerticalSamples = Math.round(@np.videoHeight / @option.vertical_sample_rate)
@@ -129,14 +129,14 @@ class CharacterPlayer
 
     paintFrame: (pixelates) ->
         for fillStyle, details of pixelates
-            @apContext.fillStyle = fillStyle
+            @cpContext.fillStyle = fillStyle
             for i in [0...details.length] by 3
                 if @option.use_character
-                    @apContext.fillText(details[i],
+                    @cpContext.fillText(details[i],
                                         details[i+1] * @option.horizontal_sample_rate,
                                         details[i+2] * @option.vertical_sample_rate)
                 else
-                    @apContext.fillRect(details[i+1] * @option.horizontal_sample_rate,
+                    @cpContext.fillRect(details[i+1] * @option.horizontal_sample_rate,
                                         details[i+2] * @option.vertical_sample_rate,
                                         @option.horizontal_sample_rate,
                                         @option.vertical_sample_rate)
@@ -154,33 +154,33 @@ class CharacterPlayer
             return false
 
     requestFullScreen: () =>
-        if "requestFullscreen" of @ap # standard treats fullscreen as one word.
-            @ap.requestFullscreen()
-        else if "webkitRequestFullScreen" of @ap # Chrome support both!!
-            @ap.webkitRequestFullScreen()
-        else if "webkitRequestFullscreen" of @ap
-            @ap.webbkitRequestscreen()
-        else if "mozRequestFullScreen" of @ap # Firefox
-            @ap.mozRequestFullScreen()
-        else if "msRequestFullscreen" of @ap # IE treats fullscreen as one word. ^_^
-            @ap.msRequestFullscreen()
+        if "requestFullscreen" of @cp # standard treats fullscreen as one word.
+            @cp.requestFullscreen()
+        else if "webkitRequestFullScreen" of @cp # Chrome support both!!
+            @cp.webkitRequestFullScreen()
+        else if "webkitRequestFullscreen" of @cp
+            @cp.webbkitRequestscreen()
+        else if "mozRequestFullScreen" of @cp # Firefox
+            @cp.mozRequestFullScreen()
+        else if "msRequestFullscreen" of @cp # IE treats fullscreen as one word. ^_^
+            @cp.msRequestFullscreen()
         else
             return false
         return true
 
     onFullscreenChange: (event) =>
         if document.isFullscreen
-            @ap.old_width = @ap.width
-            @ap.old_height = @ap.height
-            @ap.width = window.screen.width
-            @ap.height = window.screen.height
-            @apContext.save()
-            @apContext.scale(@ap.width / @np.videoWidth, @ap.height / @np.videoHeight)
+            @cp.old_width = @cp.width
+            @cp.old_height = @cp.height
+            @cp.width = window.screen.width
+            @cp.height = window.screen.height
+            @cpContext.save()
+            @cpContext.scale(@cp.width / @np.videoWidth, @cp.height / @np.videoHeight)
             console.log "enter fullscreen"
         else
-            @ap.width = @ap.old_width
-            @ap.height = @ap.old_height
-            @apContext.restore()
+            @cp.width = @cp.old_width
+            @cp.height = @cp.old_height
+            @cpContext.restore()
             console.log "exit fullscreen"
 
     pixelateArea: (pixelArrayData) ->

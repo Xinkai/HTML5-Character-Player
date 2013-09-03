@@ -26,11 +26,21 @@
             width: 100%;
         }
         body {
-            width: 1280px;
-            margin: 0 auto;
+            margin: 0;
+            padding: 0;
+            background: darkseagreen;
         }
-        #native_player, #ascii_player {
-            background: green;
+        h2 {
+            margin-top: 0;
+        }
+        #wrapper {
+            width: 1295px;
+            margin: 0 auto;
+            padding: 20px 10px;
+            background-color: whitesmoke;
+        }
+        #native_player, #character_player {
+            background: black;
             display: inline-block;
         }
 
@@ -55,14 +65,31 @@
             background: #352642;
             color: whitesmoke;
         }
+
+        div.video_player_container {
+            width: 640px;
+            height: 360px;
+            float: left;
+            background: black;
+            margin-right: 15px;
+            text-align: center;
+        }
+        div.video_player_container:last-of-type {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
+<div id="wrapper">
 <h2>HTML5 Character Player</h2>
-<video id="native_player" autoplay="false" controls loop></video>
-<canvas id="ascii_player"></canvas>
+<div class="video_player_container">
+    <video id="native_player" autoplay="false" controls loop width="640" height="360"></video>
+</div>
+<div class="video_player_container">
+    <canvas id="character_player" width="640" height="360"></canvas>
+</div>
 
-<section class="clearfix">
+<section class="clearfix" style="clear: both">
     <fieldset>
         <legend>Open File</legend>
         <input type="file" id="input_file_open" accept="video/*" /><br />
@@ -176,5 +203,6 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
+</div>
 </body>
 </html>

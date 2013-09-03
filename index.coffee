@@ -2,7 +2,7 @@
 
 loadPlayer = () ->
     np = document.getElementById("native_player")
-    ap = document.getElementById("ascii_player")
+    cp = document.getElementById("character_player")
 
     input_pixelate_width = document.getElementById("input_pixelate_width")
     input_pixelate_height = document.getElementById("input_pixelate_height")
@@ -13,7 +13,7 @@ loadPlayer = () ->
     btn_fullscreen = document.getElementById("btn_fullscreen")
     btn_snapshot = document.getElementById("btn_snapshot")
 
-    player = new CharacterPlayer(np, ap, {
+    player = new CharacterPlayer(np, cp, {
         horizontal_sample_rate: input_pixelate_width.value
         vertical_sample_rate: input_pixelate_height.value
         use_character: input_use_character.checked
@@ -49,7 +49,7 @@ loadPlayer = () ->
             alert "Your browser doesn't support full screen."
 
     onSnapshotClick = () ->
-        window.open(ap.toDataURL(), "Snapshot")
+        window.open(cp.toDataURL(), "Snapshot")
 
     input_pixelate_width.addEventListener("change", onPixelateSizeChange)
     input_pixelate_height.addEventListener("change", onPixelateSizeChange)
@@ -68,8 +68,8 @@ loadPlayer = () ->
     )
 
     np.addEventListener("canplay", () ->
-        document.getElementById("video_width").innerHTML = ap.width = np.videoWidth
-        document.getElementById("video_height").innerHTML = ap.height = np.videoHeight
+        document.getElementById("video_width").innerHTML = cp.width = np.videoWidth
+        document.getElementById("video_height").innerHTML = cp.height = np.videoHeight
         btn_snapshot.disabled = false
     )
 
