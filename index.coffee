@@ -19,9 +19,13 @@ loadPlayer = () ->
         use_character: input_use_character.checked
         character_set: input_character_set.value.split(" ")
         force_black: input_force_black.checked
+        max_width: parseInt(cp.parentNode.clientWidth)
+        max_height: parseInt(cp.parentNode.clientHeight)
     }, (fps) ->
         document.getElementById("fps").innerHTML = fps
     )
+    # expose this variable for the convenience of debugging
+    window.player = player
 
     onPixelateSizeChange = () ->
         player.setOption
@@ -68,8 +72,8 @@ loadPlayer = () ->
     )
 
     np.addEventListener("canplay", () ->
-        document.getElementById("video_width").innerHTML = cp.width = np.videoWidth
-        document.getElementById("video_height").innerHTML = cp.height = np.videoHeight
+        document.getElementById("video_width").innerHTML = np.videoWidth
+        document.getElementById("video_height").innerHTML = np.videoHeight
         btn_snapshot.disabled = false
     )
 

@@ -46,14 +46,14 @@ addPixelate = (obj, fillStyle, text, h, v) ->
         obj[fillStyle] = new Array(text, h, v)
 
 class CharacterPlayer
-    constructor: (@np, @cp, options, onFpsUpdate) ->
+    constructor: (@np, @cp, @option, onFpsUpdate) ->
         # for RequestAnimationFrame
         @requestId = null
+
+        # for FPS
         @framePainted = null
         @fpsIntervalId = null
         @fpsUpdateRate = 250
-        # options
-        @option = options
 
         # snapshoting native player into a canvas for every frame
         @sn = document.createElement("canvas")
@@ -73,8 +73,17 @@ class CharacterPlayer
         @np.addEventListener "pause", @onPause
 
         @np.addEventListener("canplay", () =>
-            @sn.width = @np.videoWidth
-            @sn.height = @np.videoHeight
+            ratio_width = @option.max_width / @np.videoWidth
+            ratio_height = @option.max_height / @np.videoHeight
+
+            snapshotRatio = Math.min(ratio_width, ratio_height)
+
+            @sn.width = @np.videoWidth * snapshotRatio
+            @sn.height = @np.videoHeight * snapshotRatio
+            @snContext.scale(snapshotRatio, snapshotRatio)
+
+            cp.width = @sn.width
+            cp.height = @sn.height
         )
 
         document.addEventListener("fullscreenchange", @onFullscreenChange)
@@ -97,8 +106,8 @@ class CharacterPlayer
         @cpContext.fillStyle = "white"
         @cpContext.fillRect(0, 0, @cp.width, @cp.height)
 
-        numHorizontalSamples = Math.round(@np.videoWidth / @option.horizontal_sample_rate)
-        numVerticalSamples = Math.round(@np.videoHeight / @option.vertical_sample_rate)
+        numHorizontalSamples = Math.round(@sn.width / @option.horizontal_sample_rate)
+        numVerticalSamples = Math.round(@sn.height / @option.vertical_sample_rate)
 
         pixelates = new Object(null)
         # pixelates = {
@@ -172,10 +181,16 @@ class CharacterPlayer
         if document.isFullscreen
             @cp.old_width = @cp.width
             @cp.old_height = @cp.height
-            @cp.width = window.screen.width
-            @cp.height = window.screen.height
+
+            fsRatio_width = screen.width / @cp.old_width
+            fsRatio_height = screen.height / @cp.old_height
+            fsRatio = Math.min(fsRatio_width, fsRatio_height)
+
+            @cp.width = @cp.old_width * fsRatio
+            @cp.height = @cp.old_height * fsRatio
+
             @cpContext.save()
-            @cpContext.scale(@cp.width / @np.videoWidth, @cp.height / @np.videoHeight)
+            @cpContext.scale(fsRatio, fsRatio)
             console.log "enter fullscreen"
         else
             @cp.width = @cp.old_width
@@ -184,6 +199,7 @@ class CharacterPlayer
             console.log "exit fullscreen"
 
     pixelateArea: (pixelArrayData) ->
+        # the magic num 4 is the size of pixel data structure rgba
         # return [rgb_css_str, greyscale]
         numPixels = pixelArrayData.length / 4
 
