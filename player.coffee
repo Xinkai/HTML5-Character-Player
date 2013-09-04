@@ -179,7 +179,6 @@ class CharacterPlayer
             @cpContext.fillStyle = fillStyle
             for i in [0...details.length] by 3
                 if @option.use_character
-                    @cpContext.font = @option.character_font_size + " sans-serif"
                     @cpContext.fillText(details[i],
                                         details[i+1] * @option.horizontal_sample_rate,
                                         details[i+2] * @option.vertical_sample_rate)
@@ -193,6 +192,8 @@ class CharacterPlayer
     setOption: (options) ->
         for key, value of options
             @option[key] = value
+            if key is "character_font_size"
+                @cpContext.font = @option.character_font_size + " sans-serif"
 
     open: (file) ->
         try
