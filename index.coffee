@@ -8,17 +8,19 @@ loadPlayer = () ->
     input_pixelate_height = document.getElementById("input_pixelate_height")
     input_character_set = document.getElementById("input_character_set")
     input_use_character = document.getElementById("input_use_character")
-    input_force_black = document.getElementById("input_force_black")
+    input_character_font_size = document.getElementById("input_character_font_size")
+    input_character_color = document.getElementById("input_character_color")
 
     btn_fullscreen = document.getElementById("btn_fullscreen")
     btn_snapshot = document.getElementById("btn_snapshot")
 
     player = new CharacterPlayer(np, cp, {
-        horizontal_sample_rate: input_pixelate_width.value
-        vertical_sample_rate: input_pixelate_height.value
+        horizontal_sample_rate: parseInt input_pixelate_width.value
+        vertical_sample_rate: parseInt input_pixelate_height.value
         use_character: input_use_character.checked
         character_set: input_character_set.value.split(" ")
-        force_black: input_force_black.checked
+        character_font_size: input_character_font_size.value + "px"
+        character_color: input_character_color.value.trim()
         max_width: parseInt(cp.parentNode.clientWidth)
         max_height: parseInt(cp.parentNode.clientHeight)
     }, (fps) ->
@@ -28,9 +30,11 @@ loadPlayer = () ->
     window.player = player
 
     onPixelateSizeChange = () ->
+        document.getElementById("pixelate_width").innerHTML = input_pixelate_width.value
+        document.getElementById("pixelate_height").innerHTML = input_pixelate_height.value
         player.setOption
-            horizontal_sample_rate: input_pixelate_width.value
-            vertical_sample_rate: input_pixelate_height.value
+            horizontal_sample_rate: parseInt input_pixelate_width.value
+            vertical_sample_rate: parseInt input_pixelate_height.value
 
     onCharacterSetChange = () ->
         player.setOption
@@ -44,9 +48,10 @@ loadPlayer = () ->
     onFileOpen = () ->
         player.open URL.createObjectURL @files[0]
 
-    onForceBlackSet = () ->
+    onCharacterFontSizeSet = () ->
+        document.getElementById("character_font_size").innerHTML = input_character_font_size.value
         player.setOption
-            force_black: input_force_black.checked
+            character_font_size: input_character_font_size.value + "px"
 
     onFullscreenClick = () ->
         if not player.requestFullScreen()
@@ -55,6 +60,10 @@ loadPlayer = () ->
     onSnapshotClick = () ->
         window.open(cp.toDataURL(), "Snapshot")
 
+    onCharacterColorSet = () ->
+        player.setOption
+            character_color: input_character_color.value.trim()
+
     input_pixelate_width.addEventListener("change", onPixelateSizeChange)
     input_pixelate_height.addEventListener("change", onPixelateSizeChange)
 
@@ -62,7 +71,9 @@ loadPlayer = () ->
     input_use_character.addEventListener("change", onUseCharacterChange)
     input_file_open.addEventListener("change", onFileOpen)
 
-    input_force_black.addEventListener("change", onForceBlackSet)
+    input_character_font_size.addEventListener("change", onCharacterFontSizeSet)
+    input_character_color.addEventListener("change", onCharacterColorSet)
+
     btn_fullscreen.addEventListener("click", onFullscreenClick)
     btn_snapshot.addEventListener("click", onSnapshotClick)
 
@@ -82,5 +93,9 @@ loadPlayer = () ->
         file = event.dataTransfer.files[0]
         player.open URL.createObjectURL file
     )
+
+    # initialize
+    onPixelateSizeChange()
+    onCharacterFontSizeSet()
 
 window.addEventListener("load", loadPlayer)

@@ -60,7 +60,6 @@ class CharacterPlayer
         @snContext = @sn.getContext("2d")
 
         @cpContext = @cp.getContext("2d")
-        @cpContext.font = "5px"
 
         @np.addEventListener "playing", () =>
             @onPause()
@@ -135,8 +134,8 @@ class CharacterPlayer
 
                 fillStyle = pixelate[0]
                 if @option.use_character
-                    if @option.force_black
-                        fillStyle = "black"
+                    if @option.character_color
+                        fillStyle = @option.character_color
                     text = @option.character_set[Math.floor(pixelate[1] / (256 / @option.character_set.length))]
                     addPixelate(pixelates, fillStyle, text, h, v)
                 else
@@ -152,6 +151,7 @@ class CharacterPlayer
             @cpContext.fillStyle = fillStyle
             for i in [0...details.length] by 3
                 if @option.use_character
+                    @cpContext.font = @option.character_font_size + " sans-serif"
                     @cpContext.fillText(details[i],
                                         details[i+1] * @option.horizontal_sample_rate,
                                         details[i+2] * @option.vertical_sample_rate)

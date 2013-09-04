@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>HTML5 Character Player</title>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="index.css" />
     <script src="player.js"></script>
     <script src="index.js"></script>
@@ -12,7 +13,9 @@
 </head>
 <body>
 <div id="wrapper">
+
 <h2>HTML5 Character Player</h2>
+
 <div id="native_player_container" class="video_player_container">
     <video id="native_player" autoplay controls loop width="640" height="360"></video>
 </div>
@@ -20,30 +23,62 @@
     <canvas id="character_player" width="640" height="360"></canvas>
 </div>
 
-<section class="clearfix" style="clear: both">
+<section id="tabs" class="clearfix">
     <fieldset>
-        <legend>Open File</legend>
-        <input type="file" id="input_file_open" accept="video/*" /><br />
-        You can also drag a video file from your computer and drop <span style="background: lightskyblue">HERE</span>.
-        <hr />
-        Video Height: <span id="video_height"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Video Width: <span id="video_width"></span><br />
-        FPS: <span id="fps"></span><br />
-        <button type="button" id="btn_snapshot" disabled>Snapshot</button>
-        <button type="button" id="btn_fullscreen">Fullscreen</button>
+        <legend>Commands</legend>
+        <div id="file_open_wrapper" class="btn btn-success"><i class="glyphicon glyphicon-film"></i>Open File
+            <input type="file" id="input_file_open" accept="video/*" />
+        </div>
+        <button type="button" id="btn_snapshot" disabled class="btn btn-success"><i class="glyphicon glyphicon-picture"></i>Snapshot</button>
+        <button type="button" id="btn_fullscreen" class="btn btn-success"><i class="glyphicon glyphicon-fullscreen"></i>Fullscreen</button>
+        <div id="status">
+            FPS: <span id="fps"></span><br />
+            Video width: <span id="video_width"></span> px<br />
+            Video height: <span id="video_height"></span> px<br />
+        </div>
+
     </fieldset>
-    <fieldset>
-        <legend>Setting</legend>
-        <strong>Pixelate</strong>
-        width: <input type="number" id="input_pixelate_width" value="10" min="2" max="50" />px
-        height: <input type="number" id="input_pixelate_height" value="10" min="2" max="50" />px<br />
-        <label><input type="checkbox" id="input_use_character" />Use characters:</label>
-        <input type="text" id="input_character_set" value="&#9608; &#9619; &#9618; &#9617; &nbsp;" disabled /><br />
-        <p style="margin: 3px 0">
-            Characters set examples: <span style="background:lightgrey">@ A k o 一 . &amp;nbsp;</span><br />
-            Order matters: "intense" characters should come first. Use space as a delimiter.
-        </p>
-        <label><input type="checkbox" id="input_force_black" />Force black characters</label>
+    <fieldset id="settings">
+        <legend>Settings</legend>
+        <form role="form">
+            <div class="setting-group clearfix">
+                <div class="slider_label">
+                    <label for="input_pixelate_width" class="control-label">Pixelate width</label>
+                    <label for="input_pixelate_width">
+                        <span id="pixelate_width"></span> px
+                    </label>
+                </div>
+                <input type="range" id="input_pixelate_width" value="10" min="2" max="50" />
+
+                <div class="slider_label">
+                    <label for="input_pixelate_height" class="control-label">
+                        Pixelate height <span id="pixelate_height"></span> px
+                    </label>
+                    <div>
+                        <input type="range" id="input_pixelate_height" value="10" min="2" max="50" />
+                    </div>
+                </div>
+            </div>
+            <div class="setting-group clearfix">
+                <label><input type="checkbox" id="input_use_character" />Use characters</label>
+                <label>
+                    <input type="text" id="input_character_set" class="form-control" value="&#9608; &#9619; &#9618; &#9617; &nbsp;" disabled />
+                </label>
+                <p class="help_text">
+                    For example: <code>@ ★ ☆ ○ . &amp;nbsp;</code><br />
+                    "Intense" characters should come first. Use space as a delimiter.
+                </p>
+            </div>
+            <div class="setting-group clearfix">
+                <div class="slider_label">
+                    <label for="input_character_font_size">Character font size <span id="character_font_size"></span> px</label>
+                    <input type="range" id="input_character_font_size" value="10" min="2" max="20" />
+                </div>
+                <br />
+                <label>Override character color<br />
+                <input type="text" id="input_character_color" class="form-control" placeholder="CSS color string" /></label>
+            </div>
+        </form>
     </fieldset>
 </section>
 <article id="AnQ">
