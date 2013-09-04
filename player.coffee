@@ -37,7 +37,8 @@ if "isFullscreen" not of document
 # Utilities
 
 pixelateFrameData = (frameData, l, t, w, h) -> # left, top, width, height
-    # can safely assume that l + w <= frameData.width; t + h <= frameData.height
+    # This function avoids calling getImageData() multiple times, which is very slow.
+    # This function can safely assume that l + w <= frameData.width; t + h <= frameData.height
     data = frameData.data
     numPixels = w * h
 
@@ -111,6 +112,10 @@ class CharacterPlayer
 
             cp.width = @sn.width
             cp.height = @sn.height
+
+            # every time load a new file, text alignments reset, at least on Chrome
+            @cpContext.textBaseline = "top"
+            @cpContext.textAlign = "left"
         )
 
         document.addEventListener("fullscreenchange", @onFullscreenChange)
@@ -134,12 +139,12 @@ class CharacterPlayer
         @cpContext.fillStyle = "white"
         @cpContext.fillRect(0, 0, @cp.width, @cp.height)
 
-        numHorizontalSamples = Math.round(@sn.width / @option.horizontal_sample_rate)
-        numVerticalSamples = Math.round(@sn.height / @option.vertical_sample_rate)
+        numHorizontalSamples = Math.ceil(@sn.width / @option.horizontal_sample_rate)
+        numVerticalSamples = Math.ceil(@sn.height / @option.vertical_sample_rate)
 
         pixelates = new Object(null)
         # pixelates = {
-        #    [fillStyle]: [h1, v1, text], [h2, v2]
+        #    [fillStyle]: [text, h1, v1], [null, h2, v2]
         # }
 
         for h in [0...numHorizontalSamples] by 1
