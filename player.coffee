@@ -35,6 +35,23 @@ if "isFullscreen" not of document
     })
 
 # Utilities
+floorPositiveNum = (num) ->
+    num | 0
+
+roundPositiveNum = (num) ->
+    (.5 + num) | 0
+
+ceilPositiveNum = (num) ->
+    tmp = num | 0
+    if tmp is num
+        return tmp
+    else
+        return tmp + 1
+
+min = (a, b) ->
+    if a < b
+        return a
+    else return b
 
 pixelateFrameData = (frameData, l, t, w, h) -> # left, top, width, height
     # This function avoids calling getImageData() multiple times, which is very slow.
@@ -55,9 +72,9 @@ pixelateFrameData = (frameData, l, t, w, h) -> # left, top, width, height
             b += data[pixelIndex + 2]
             pixelIndex += 4
 
-    r = Math.round(r / numPixels)
-    g = Math.round(g / numPixels)
-    b = Math.round(b / numPixels)
+    r = roundPositiveNum(r / numPixels)
+    g = roundPositiveNum(g / numPixels)
+    b = roundPositiveNum(b / numPixels)
 
     return [
         "rgb(#{r}, #{g}, #{b})"
@@ -80,7 +97,7 @@ class CharacterPlayer
         @requestId = null
 
         # for FPS
-        @framePainted = null
+        @numFramePainted = null
         @fpsIntervalId = null
         @fpsUpdateRate = 250
 
@@ -93,8 +110,8 @@ class CharacterPlayer
         @np.addEventListener "playing", () =>
             @onPause()
             @fpsIntervalId = setInterval( () =>
-                onFpsUpdate @framePainted / (@fpsUpdateRate / 1000)
-                @framePainted = 0
+                onFpsUpdate @numFramePainted / (@fpsUpdateRate / 1000)
+                @numFramePainted = 0
             , @fpsUpdateRate)
             @requestId = requestAnimationFrame(@nextFrame)
 
@@ -104,7 +121,7 @@ class CharacterPlayer
             ratio_width = @option.max_width / @np.videoWidth
             ratio_height = @option.max_height / @np.videoHeight
 
-            snapshotRatio = Math.min(ratio_width, ratio_height)
+            snapshotRatio = min(ratio_width, ratio_height)
 
             @sn.width = @np.videoWidth * snapshotRatio
             @sn.height = @np.videoHeight * snapshotRatio
@@ -113,9 +130,9 @@ class CharacterPlayer
             cp.width = @sn.width
             cp.height = @sn.height
 
-            # every time load a new file, text alignments reset, at least on Chrome
-            @cpContext.textBaseline = "top"
-            @cpContext.textAlign = "left"
+            # otherwise clearRect() causes black background
+            cp.style.backgroundColor = "white"
+            @enforceTextAlignment()
         )
 
         document.addEventListener("fullscreenchange", @onFullscreenChange)
@@ -123,12 +140,17 @@ class CharacterPlayer
         document.addEventListener("mozfullscreenchange", @onFullscreenChange)
         document.addEventListener("MSFullscreenChange", @onFullscreenChange)
 
+    enforceTextAlignment: () =>
+        # every time canvas resizes, text alignments reset, at least on Chrome
+        @cpContext.textBaseline = "top"
+        @cpContext.textAlign = "left"
+
     onPause: () =>
         if @requestId
             cancelAnimationFrame(@requestId)
         if @fpsIntervalId
             clearInterval(@fpsIntervalId)
-        @framePainted = 0
+        @numFramePainted = 0
 
     nextFrame: () =>
         # snapshot
@@ -136,11 +158,10 @@ class CharacterPlayer
         frameData = @snContext.getImageData(0, 0, @sn.width, @sn.height)
 
         # clean canvas
-        @cpContext.fillStyle = "white"
-        @cpContext.fillRect(0, 0, @cp.width, @cp.height)
+        @cpContext.clearRect(0, 0, @cp.width, @cp.height)
 
-        numHorizontalSamples = Math.ceil(@sn.width / @option.horizontal_sample_rate)
-        numVerticalSamples = Math.ceil(@sn.height / @option.vertical_sample_rate)
+        numHorizontalSamples = ceilPositiveNum(@sn.width / @option.horizontal_sample_rate)
+        numVerticalSamples = ceilPositiveNum(@sn.height / @option.vertical_sample_rate)
 
         pixelates = new Object(null)
         # pixelates = {
@@ -169,13 +190,13 @@ class CharacterPlayer
                 if @option.use_character
                     if @option.character_color
                         fillStyle = @option.character_color
-                    text = @option.character_set[Math.floor(pixelate[1] / (256 / @option.character_set.length))]
+                    text = @option.character_set[floorPositiveNum(pixelate[1] / (256 / @option.character_set.length))]
                     addPixelate(pixelates, fillStyle, text, h, v)
                 else
                     addPixelate(pixelates, fillStyle, null, h, v)
 
         @paintFrame(pixelates)
-        @framePainted++
+        @numFramePainted++
         @requestId = requestAnimationFrame(@nextFrame)
         null
 
@@ -229,7 +250,7 @@ class CharacterPlayer
 
             fsRatio_width = screen.width / @cp.old_width
             fsRatio_height = screen.height / @cp.old_height
-            fsRatio = Math.min(fsRatio_width, fsRatio_height)
+            fsRatio = min(fsRatio_width, fsRatio_height)
 
             @cp.width = @cp.old_width * fsRatio
             @cp.height = @cp.old_height * fsRatio
@@ -242,5 +263,6 @@ class CharacterPlayer
             @cp.height = @cp.old_height
             @cpContext.restore()
             console.log "exit fullscreen"
+        @enforceTextAlignment()
 
 window.CharacterPlayer = CharacterPlayer
