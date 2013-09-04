@@ -35,6 +35,34 @@ if "isFullscreen" not of document
     })
 
 # Utilities
+
+pixelateFrameData = (frameData, l, t, w, h) -> # left, top, width, height
+    # can safely assume that l + w <= frameData.width; t + h <= frameData.height
+    data = frameData.data
+    numPixels = w * h
+
+    r = 0
+    g = 0
+    b = 0
+
+    rowBaseIndex = 4 * (frameData.width * t + l) # index of [left, top]
+    for row in [0...h] by 1
+        pixelIndex = rowBaseIndex + 4 * frameData.width
+        for column in [0...w] by 1
+            r += data[pixelIndex]
+            g += data[pixelIndex + 1]
+            b += data[pixelIndex + 2]
+            pixelIndex += 4
+
+    r = Math.round(r / numPixels)
+    g = Math.round(g / numPixels)
+    b = Math.round(b / numPixels)
+
+    return [
+        "rgb(#{r}, #{g}, #{b})"
+        (r + g + b) / 3
+    ]
+
 addPixelate = (obj, fillStyle, text, h, v) ->
     # Add everything needed for painting a frame to an object.
     # This object is later handed to paintFrame.
@@ -100,6 +128,7 @@ class CharacterPlayer
     nextFrame: () =>
         # snapshot
         @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
+        frameData = @snContext.getImageData(0, 0, @sn.width, @sn.height)
 
         # clean canvas
         @cpContext.fillStyle = "white"
@@ -129,8 +158,7 @@ class CharacterPlayer
                 else
                     areaHeight = @option.vertical_sample_rate
 
-                areaPixelArray = @snContext.getImageData(areaLeft, areaTop, areaWidth, areaHeight)
-                pixelate = @pixelateArea(areaPixelArray.data)
+                pixelate = pixelateFrameData(frameData, areaLeft, areaTop, areaWidth, areaHeight)
 
                 fillStyle = pixelate[0]
                 if @option.use_character
@@ -208,28 +236,5 @@ class CharacterPlayer
             @cp.height = @cp.old_height
             @cpContext.restore()
             console.log "exit fullscreen"
-
-    pixelateArea: (pixelArrayData) ->
-        # the magic num 4 is the size of pixel data structure rgba
-        # return [rgb_css_str, greyscale]
-        numPixels = pixelArrayData.length / 4
-
-        r = 0
-        g = 0
-        b = 0
-
-        for i in [0...pixelArrayData.length] by 4
-            r += pixelArrayData[i]
-            g += pixelArrayData[i + 1]
-            b += pixelArrayData[i + 2]
-
-        r = Math.round(r / numPixels)
-        g = Math.round(g / numPixels)
-        b = Math.round(b / numPixels)
-
-        return [
-            "rgb(#{r}, #{g}, #{b})"
-            (r + g + b) / 3
-        ]
 
 window.CharacterPlayer = CharacterPlayer
