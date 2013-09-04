@@ -14,7 +14,7 @@
 <body>
 <div id="wrapper">
 
-<h2>HTML5 Character Player</h2>
+<h1>HTML5 Character Player</h1>
 
 <div id="native_player_container" class="video_player_container">
     <video id="native_player" autoplay controls loop width="640" height="360"></video>
@@ -26,17 +26,16 @@
 <section id="tabs" class="clearfix">
     <fieldset>
         <legend>Commands</legend>
-        <div id="file_open_wrapper" class="btn btn-success"><i class="glyphicon glyphicon-film"></i>Open File
+        <div id="file_open_wrapper" class="btn btn-success"><i class="glyphicon glyphicon-film"></i>&nbsp;Open File
             <input type="file" id="input_file_open" accept="video/*" />
         </div>
-        <button type="button" id="btn_snapshot" disabled class="btn btn-success"><i class="glyphicon glyphicon-picture"></i>Snapshot</button>
-        <button type="button" id="btn_fullscreen" class="btn btn-success"><i class="glyphicon glyphicon-fullscreen"></i>Fullscreen</button>
+        <button type="button" id="btn_snapshot" disabled class="btn btn-success"><i class="glyphicon glyphicon-picture"></i>&nbsp;Snapshot</button>
+        <button type="button" id="btn_fullscreen" class="btn btn-success"><i class="glyphicon glyphicon-fullscreen"></i>&nbsp;Fullscreen</button>
         <div id="status">
             FPS: <span id="fps"></span><br />
-            Video width: <span id="video_width"></span> px<br />
-            Video height: <span id="video_height"></span> px<br />
+            Video width: <span id="video_width"></span> px&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Video height: <span id="video_height"></span> px
         </div>
-
     </fieldset>
     <fieldset id="settings">
         <legend>Settings</legend>
@@ -48,16 +47,14 @@
                         <span id="pixelate_width"></span> px
                     </label>
                 </div>
-                <input type="range" id="input_pixelate_width" value="10" min="2" max="50" />
+                <input type="range" id="input_pixelate_width" value="10" min="2" max="30" />
 
                 <div class="slider_label">
                     <label for="input_pixelate_height" class="control-label">
                         Pixelate height <span id="pixelate_height"></span> px
                     </label>
-                    <div>
-                        <input type="range" id="input_pixelate_height" value="10" min="2" max="50" />
-                    </div>
                 </div>
+                <input type="range" id="input_pixelate_height" value="10" min="2" max="30" />
             </div>
             <div class="setting-group clearfix">
                 <label><input type="checkbox" id="input_use_character" />Use characters</label>
@@ -81,81 +78,14 @@
         </form>
     </fieldset>
 </section>
-<article id="AnQ">
-    <h4>A &amp; Q</h4>
-    <p class="question">Which kind of file can be played?</p>
-    <p>
-        The video files on your hard drive with the right format. The format depends on which browser you're using.
-        <table id="browser_video_format">
-            <thead>
-                <tr>
-                    <th>Browser</th>
-                    <th>Mp4</th>
-                    <th>WebM</th>
-                    <th>Ogg</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Internet Explorer</td>
-                    <td>yes</td>
-                    <td>no</td>
-                    <td>no</td>
-                </tr>
-                <tr>
-                    <td>Chrome</td>
-                    <td>yes</td>
-                    <td>yes</td>
-                    <td>yes</td>
-                </tr>
-                <tr>
-                    <td>Firefox</td>
-                    <td>no</td>
-                    <td>yes</td>
-                    <td>yes</td>
-                </tr>
-                <tr>
-                    <td>Safari</td>
-                    <td>yes</td>
-                    <td>no</td>
-                    <td>no</td>
-                </tr>
-                <tr>
-                    <td>Opera</td>
-                    <td>no</td>
-                    <td>yes</td>
-                    <td>yes</td>
-                </tr>
-            </tbody>
-        </table>
-        <br />
-        <strong>Note:</strong>It is possible that you have a file that ends with ".mp4" but cannot be played with Chrome. Extension names doesn't tell everything about a file.
-        <br />
-        <i>Bad Apple</i> has been tested again on Google Chrome. You can <a href="http://www.rayfile.com/zh-cn/files/9af33f66-c83c-11de-89d4-0014221b798a/" rel="nofollow">download <i>Bad Apple</i></a>.
-    </p>
-
-    <p class="question">File not opening / No sound</p>
-    <p>
-        It might be a compatibility issue.<br />
-        Using the latest <a href="http://www.google.com/chrome" rel="nofollow">Google Chrome</a> on a not-too-old computer is recommended.
-    </p>
-
-    <p class="question">Extremely slow / laggy</p>
-    <p>
-        Due to the technical reasons, this software can be resource hogging. <br />
-        Do not even try running this on a mobile device or an old computer. <br />
-        You can try increasing pixelate size, by which the CPU workload decreases.
-    </p>
-
-    <p class="question">Source code / License</p>
-    <p>
-        This is a free software. Visit repo: <a href="https://github.com/Xinkai/HTML5-Character-Player">https://github.com/Xinkai/HTML5-Character-Player</a>
-    </p>
-</article>
-
-<hr style="margin-top: 20px;" />
+<hr />
 <footer>
-    <a href="http://www.cuoan.net/">Visit my blog</a>
+    <h2>GOTO</h2>
+    <a target="_blank" class="btn btn-primary" href="http://www.cuoan.net/">My blog</a>
+
+    <a target="_blank" class="btn btn-info" href="javascript: alert('TODO')">help@my blog</a>
+    <a target="_blank" class="btn btn-info" href="https://github.com/Xinkai/HTML5-Character-Player">source@github</a>
+    <a target="_self" class="btn btn-info" href="javascript: alert('TODO')">中文版</a>
 </footer>
 <script>
   var _gaq = _gaq || [];

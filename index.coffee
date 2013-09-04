@@ -83,6 +83,7 @@ loadPlayer = () ->
     )
 
     np.addEventListener("canplay", () ->
+        document.getElementById("status").style.display = "block"
         document.getElementById("video_width").innerHTML = np.videoWidth
         document.getElementById("video_height").innerHTML = np.videoHeight
         btn_snapshot.disabled = false

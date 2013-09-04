@@ -20,11 +20,32 @@ body {
     background: darkseagreen;
 }
 
+h1 {
+    margin-top: 0;
+}
+
+h1, h2, legend {
+    font-family: fantasy;
+}
+
+.btn {
+    font-family: monospace;
+}
+
+fieldset .btn:not(:last-of-type) {
+    margin-right: 5px;
+}
+
+footer .btn {
+    font-weight: bold;
+}
+
 #status {
     font-family: cursive;
     font-weight: bold;
     height: 100%;
     line-height: 35px;
+    display: none;
 }
 
 #wrapper {
@@ -32,6 +53,7 @@ body {
     margin: 0 auto;
     padding: 20px 10px;
     background-color: whitesmoke;
+    min-height: 100%;
 }
 
 #native_player, #character_player {
@@ -78,12 +100,7 @@ fieldset {
     position: absolute;
     top: 0;
     left: 0;
-}
-
-p.question {
-    font-family: monospace;
-    font-size: 20px;
-    font-weight: bold;
+    cursor: pointer;
 }
 
 .video_player_container {
@@ -101,13 +118,4 @@ p.question {
 #tabs {
     clear: both;
     margin-top: 16px;
-}
-
-#browser_video_format {
-    width: 500px;
-}
-
-#browser_video_format > thead > tr > th {
-    background: #352642;
-    color: whitesmoke;
 }
