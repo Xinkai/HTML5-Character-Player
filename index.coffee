@@ -41,7 +41,10 @@ loadPlayer = () ->
             character_set: input_character_set.value.split(" ")
 
     onUseCharacterChange = () ->
-        input_character_set.disabled = not input_use_character.checked
+        input_character_font_size.disabled =
+            input_character_color.disabled =
+            input_character_set.disabled = not input_use_character.checked
+
         player.setOption
             use_character: input_use_character.checked
 
