@@ -132,7 +132,9 @@ class CharacterPlayer
 
             # otherwise clearRect() causes black background
             cp.style.backgroundColor = "white"
-            @enforceTextAlignment()
+
+            # canvas size change causes text align error
+            @onCharacterSettingChange()
         )
 
         document.addEventListener("fullscreenchange", @onFullscreenChange)
@@ -140,10 +142,13 @@ class CharacterPlayer
         document.addEventListener("mozfullscreenchange", @onFullscreenChange)
         document.addEventListener("MSFullscreenChange", @onFullscreenChange)
 
-    enforceTextAlignment: () =>
+    onCharacterSettingChange: () =>
         # every time canvas resizes, text alignments reset, at least on Chrome
         @cpContext.textBaseline = "top"
         @cpContext.textAlign = "left"
+
+        # text align change causes font size change
+        @cpContext.font = @option.character_font_size + " sans-serif"
 
     onPause: () =>
         if @requestId
@@ -219,7 +224,7 @@ class CharacterPlayer
         for key, value of options
             @option[key] = value
             if key is "character_font_size"
-                @cpContext.font = @option.character_font_size + " sans-serif"
+                @onCharacterSettingChange()
 
     open: (file) ->
         try
@@ -263,6 +268,6 @@ class CharacterPlayer
             @cp.height = @cp.old_height
             @cpContext.restore()
             console.log "exit fullscreen"
-        @enforceTextAlignment()
+        @onCharacterSettingChange()
 
 window.CharacterPlayer = CharacterPlayer
