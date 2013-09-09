@@ -127,11 +127,11 @@ class CharacterPlayer
             @sn.height = @np.videoHeight * snapshotRatio
             @snContext.scale(snapshotRatio, snapshotRatio)
 
-            cp.width = @sn.width
-            cp.height = @sn.height
+            @cp.width = @sn.width
+            @cp.height = @sn.height
 
             # otherwise clearRect() causes black background
-            cp.style.backgroundColor = "white"
+            @cp.style.backgroundColor = "white"
 
             # canvas size change causes text align error
             @onCharacterSettingChange()
@@ -162,7 +162,7 @@ class CharacterPlayer
         @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
         frameData = @snContext.getImageData(0, 0, @sn.width, @sn.height)
 
-        # clean canvas
+        # clear canvas
         @cpContext.clearRect(0, 0, @cp.width, @cp.height)
 
         numHorizontalSamples = ceilPositiveNum(@sn.width / @option.horizontal_sample_rate)
