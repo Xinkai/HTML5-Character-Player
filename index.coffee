@@ -29,6 +29,11 @@ loadPlayer = () ->
     # expose this variable for the convenience of debugging
     window.player = player
 
+    decodeHTMLEntities = (encoded) ->
+        span = document.createElement("span")
+        span.innerHTML = encoded
+        return span.textContent
+
     onPixelateSizeChange = () ->
         document.getElementById("pixelate_width").innerHTML = input_pixelate_width.value
         document.getElementById("pixelate_height").innerHTML = input_pixelate_height.value
@@ -38,7 +43,7 @@ loadPlayer = () ->
 
     onCharacterSetChange = () ->
         player.setOption
-            character_set: input_character_set.value.split(" ")
+            character_set: decodeHTMLEntities(input_character_set.value).split(" ")
 
     onUseCharacterChange = () ->
         input_character_font_size.disabled =
