@@ -34,65 +34,18 @@ if "isFullscreen" not of document
                 return false
     })
 
-# Utilities
-floorPositiveNum = (num) ->
-    num | 0
-
-roundPositiveNum = (num) ->
-    (.5 + num) | 0
-
-ceilPositiveNum = (num) ->
-    tmp = num | 0
-    if tmp is num
-        return tmp
-    else
-        return tmp + 1
-
 min = (a, b) ->
     if a < b
         return a
     else return b
 
-pixelateFrameData = (frameData, l, t, w, h) -> # left, top, width, height
-    # This function avoids calling getImageData() multiple times, which is very slow.
-    # This function can safely assume that l + w <= frameData.width; t + h <= frameData.height
-    data = frameData.data
-    numPixels = w * h
-
-    r = 0
-    g = 0
-    b = 0
-
-    rowBaseIndex = 4 * (frameData.width * t + l) # index of [left, top]
-    for row in [0...h] by 1
-        pixelIndex = rowBaseIndex + 4 * frameData.width
-        for column in [0...w] by 1
-            r += data[pixelIndex]
-            g += data[pixelIndex + 1]
-            b += data[pixelIndex + 2]
-            pixelIndex += 4
-
-    r = roundPositiveNum(r / numPixels)
-    g = roundPositiveNum(g / numPixels)
-    b = roundPositiveNum(b / numPixels)
-
-    return [
-        "rgb(#{r}, #{g}, #{b})"
-        (r + g + b) / 3
-    ]
-
-addPixelate = (obj, fillStyle, text, h, v) ->
-    # Add everything needed for painting a frame to an object.
-    # This object is later handed to paintFrame.
-    value = obj[fillStyle]
-    if value
-        value.push(text, h, v)
-        obj[fillStyle] = value
-    else
-        obj[fillStyle] = new Array(text, h, v)
 
 class CharacterPlayer
     constructor: (@np, @cp, @option, onFpsUpdate) ->
+        # spawn a worker
+        @worker = new Worker("worker.js")
+        @worker.onmessage = @paintFrame
+
         # for RequestAnimationFrame
         @requestId = null
 
@@ -141,6 +94,7 @@ class CharacterPlayer
         document.addEventListener("webkitfullscreenchange", @onFullscreenChange)
         document.addEventListener("mozfullscreenchange", @onFullscreenChange)
         document.addEventListener("MSFullscreenChange", @onFullscreenChange)
+        null
 
     onCharacterSettingChange: () =>
         # every time canvas resizes, text alignments reset, at least on Chrome
@@ -149,6 +103,7 @@ class CharacterPlayer
 
         # text align change causes font size change
         @cpContext.font = @option.character_font_size + " sans-serif"
+        null
 
     onPause: () =>
         if @requestId
@@ -156,56 +111,28 @@ class CharacterPlayer
         if @fpsIntervalId
             clearInterval(@fpsIntervalId)
         @numFramePainted = 0
+        null
 
     nextFrame: () =>
         # snapshot
         @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
         frameData = @snContext.getImageData(0, 0, @sn.width, @sn.height)
 
+        @worker.postMessage({
+            frame: frameData.data
+            frameHeight: frameData.height
+            frameWidth: frameData.width
+            option: @option
+        }, [frameData.data.buffer])
+        null
+
+    paintFrame: (msg) =>
+        # receive from worker
+        pixelates = msg.data
+
         # clear canvas
         @cpContext.clearRect(0, 0, @cp.width, @cp.height)
 
-        numHorizontalSamples = ceilPositiveNum(@sn.width / @option.horizontal_sample_rate)
-        numVerticalSamples = ceilPositiveNum(@sn.height / @option.vertical_sample_rate)
-
-        pixelates = new Object(null)
-        # pixelates = {
-        #    [fillStyle]: [text, h1, v1], [null, h2, v2]
-        # }
-
-        for h in [0...numHorizontalSamples] by 1
-            areaLeft = h * @option.horizontal_sample_rate
-
-            if h is numHorizontalSamples - 1 # last column
-                areaWidth = @sn.width - areaLeft
-            else
-                areaWidth = @option.horizontal_sample_rate
-
-            for v in [0...numVerticalSamples] by 1
-                areaTop = v * @option.vertical_sample_rate
-
-                if v is numVerticalSamples - 1 # last row
-                    areaHeight = @sn.height - areaTop
-                else
-                    areaHeight = @option.vertical_sample_rate
-
-                pixelate = pixelateFrameData(frameData, areaLeft, areaTop, areaWidth, areaHeight)
-
-                fillStyle = pixelate[0]
-                if @option.use_character
-                    if @option.character_color
-                        fillStyle = @option.character_color
-                    text = @option.character_set[floorPositiveNum(pixelate[1] / (256 / @option.character_set.length))]
-                    addPixelate(pixelates, fillStyle, text, h, v)
-                else
-                    addPixelate(pixelates, fillStyle, null, h, v)
-
-        @paintFrame(pixelates)
-        @numFramePainted++
-        @requestId = requestAnimationFrame(@nextFrame)
-        null
-
-    paintFrame: (pixelates) ->
         for fillStyle, details of pixelates
             @cpContext.fillStyle = fillStyle
             for i in [0...details.length] by 3
@@ -218,6 +145,8 @@ class CharacterPlayer
                                         details[i+2] * @option.vertical_sample_rate,
                                         @option.horizontal_sample_rate,
                                         @option.vertical_sample_rate)
+        @numFramePainted++
+        @requestId = requestAnimationFrame(@nextFrame)
         null
 
     setOption: (options) ->
@@ -269,5 +198,6 @@ class CharacterPlayer
             @cpContext.restore()
             console.log "exit fullscreen"
         @onCharacterSettingChange()
+        null
 
 window.CharacterPlayer = CharacterPlayer
