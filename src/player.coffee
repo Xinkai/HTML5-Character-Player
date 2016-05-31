@@ -39,12 +39,22 @@ min = (a, b) ->
         return a
     else return b
 
+WorkerStatus = {
+    Ready: 0
+    Working: 1
+}
 
 class CharacterPlayer
     constructor: (@np, @cp, @option, onFpsUpdate) ->
-        # spawn a worker
-        @worker = new Worker("worker.js")
-        @worker.onmessage = @paintFrame
+        # spawn workers
+        @workers = []
+        @workerStatus = []
+        @concurrency = navigator.hardwareConcurrency
+        for i in [0...@concurrency]
+            worker = new Worker("worker.js")
+            worker.onmessage = @paintFrame
+            @workers.push(worker)
+            @workerStatus.push(WorkerStatus.Ready)
 
         # for RequestAnimationFrame
         @requestId = null
@@ -96,6 +106,9 @@ class CharacterPlayer
         document.addEventListener("MSFullscreenChange", @onFullscreenChange)
         null
 
+    isAllWorkersReady: () =>
+        @workerStatus.every( (one) => one == WorkerStatus.Ready )
+
     onCharacterSettingChange: () =>
         # every time canvas resizes, text alignments reset, at least on Chrome
         @cpContext.textBaseline = "top"
@@ -115,23 +128,48 @@ class CharacterPlayer
 
     nextFrame: () =>
         # snapshot
-        @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
-        frameData = @snContext.getImageData(0, 0, @sn.width, @sn.height)
+        if not @isAllWorkersReady()
+            return
 
-        @worker.postMessage({
-            frame: frameData.data
-            frameHeight: frameData.height
-            frameWidth: frameData.width
-            option: @option
-        }, [frameData.data.buffer])
+        @snContext.drawImage(@np, 0, 0, @np.videoWidth, @np.videoHeight)
+
+        sliceHeight = ((@sn.height / @concurrency / @option.vertical_sample_rate) | 0) * @option.vertical_sample_rate
+
+        t = 0
+        for pos in [0...@concurrency]
+            if pos == @concurrency - 1
+                # last one
+                h = @sn.height - sliceHeight * pos
+            else
+                h = sliceHeight
+
+            meta = {
+                pos: pos
+                sliceHeight: sliceHeight
+            }
+            frameData = @snContext.getImageData(0, t, @sn.width, h)
+            @workers[pos].postMessage({
+                frame: frameData.data
+                frameHeight: h
+                frameWidth: frameData.width
+                option: @option
+                meta: meta
+            }, [frameData.data.buffer])
+            @workerStatus[pos] = WorkerStatus.Working
+            t += sliceHeight
         null
 
     paintFrame: (msg) =>
-        # receive from worker
+        # receive from workers
         pixelates = msg.data
+        sliceHeight = pixelates.meta.sliceHeight
+        pos = pixelates.meta.pos
 
         # clear canvas
-        @cpContext.clearRect(0, 0, @cp.width, @cp.height)
+        if pos != @concurrency - 1
+            @cpContext.clearRect(0, pos * sliceHeight, @cp.width, sliceHeight)
+        else
+            @cpContext.clearRect(0, pos * sliceHeight, @cp.width, @cp.height - pos * sliceHeight)
 
         for fillStyle, details of pixelates
             @cpContext.fillStyle = fillStyle
@@ -139,14 +177,17 @@ class CharacterPlayer
                 if @option.use_character
                     @cpContext.fillText(details[i],
                                         details[i+1] * @option.horizontal_sample_rate,
-                                        details[i+2] * @option.vertical_sample_rate)
+                                        details[i+2] * @option.vertical_sample_rate + pos * sliceHeight)
                 else
                     @cpContext.fillRect(details[i+1] * @option.horizontal_sample_rate,
-                                        details[i+2] * @option.vertical_sample_rate,
+                                        details[i+2] * @option.vertical_sample_rate + pos * sliceHeight,
                                         @option.horizontal_sample_rate,
                                         @option.vertical_sample_rate)
-        @numFramePainted++
-        @requestId = requestAnimationFrame(@nextFrame)
+
+        @workerStatus[pos] = WorkerStatus.Ready
+        if @isAllWorkersReady()
+            @numFramePainted++
+            @requestId = requestAnimationFrame(@nextFrame)
         null
 
     setOption: (options) ->

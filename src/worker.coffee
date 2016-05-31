@@ -131,4 +131,5 @@ onmessage = (msg) ->
         pixelateFn, frame, data.frameWidth, data.frameHeight,
         data.option
     )
+    result.meta = data.meta
     postMessage(result)
